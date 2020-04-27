@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Devices.Client
 
             HttpsEndpoint = new UriBuilder(Uri.UriSchemeHttps, HostName).Uri;
 
-            AmqpEndpoint = new UriBuilder(CommonConstants.AmqpsScheme, HostName, DefaultSecurePort).Uri;
+            AmqpEndpoint = new UriBuilder(CommonConstants.AmqpScheme, HostName, DefaultSecurePort).Uri;
 
             if (builder.AuthenticationMethod is AuthenticationWithTokenRefresh)
             {

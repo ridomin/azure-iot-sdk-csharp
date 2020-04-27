@@ -29,7 +29,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// The default operation timeout
         /// </summary>
-        public static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromMinutes(1);
+        public static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromMinutes(3);
 
         /// <summary>
         /// The default open timeout

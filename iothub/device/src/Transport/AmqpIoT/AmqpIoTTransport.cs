@@ -23,6 +23,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.AmqpIoT
         private AmqpSettings _amqpSettings;
         private AmqpTransportSettings _amqpTransportSettings;
         private TlsTransportSettings _tlsTransportSettings;
+        private TcpTransportSettings _unencryptedTcpTransportSettings;
 
         public AmqpIoTTransport(AmqpSettings amqpSettings, AmqpTransportSettings amqpTransportSettings, string hostName, bool disableServerCertificateValidation)
         {
@@ -60,6 +61,8 @@ namespace Microsoft.Azure.Devices.Client.Transport.AmqpIoT
             {
                 _tlsTransportSettings.Certificate = _amqpTransportSettings.ClientCertificate;
             }
+
+            _unencryptedTcpTransportSettings = tcpTransportSettings;
         }
 
         internal async Task<TransportBase> InitializeAsync(TimeSpan timeout)
@@ -74,7 +77,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.AmqpIoT
                     break;
 
                 case TransportType.Amqp_Tcp_Only:
-                    var amqpTransportInitiator = new AmqpTransportInitiator(_amqpSettings, _tlsTransportSettings);
+                    var amqpTransportInitiator = new AmqpTransportInitiator(_amqpSettings, _unencryptedTcpTransportSettings);
                     transport = await amqpTransportInitiator.ConnectTaskAsync(timeout).ConfigureAwait(false);
                     break;
 
