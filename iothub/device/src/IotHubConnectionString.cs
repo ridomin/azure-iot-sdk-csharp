@@ -30,6 +30,7 @@ namespace Microsoft.Azure.Devices.Client
             IotHubName = builder.IotHubName;
             DeviceId = builder.DeviceId;
             ModuleId = builder.ModuleId;
+            ModelId = builder.ModelId;
 
             HttpsEndpoint = new UriBuilder(Uri.UriSchemeHttps, HostName).Uri;
 
@@ -79,5 +80,7 @@ namespace Microsoft.Azure.Devices.Client
         public string SharedAccessKey { get; private set; }
 
         public string SharedAccessSignature { get; private set; }
+
+        public string ModelId { get; private set; }
     }
 }

@@ -30,7 +30,8 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                 mqttTransportSettings,
                 willMessage,
                 mqttIotHubEventHandler,
-                productInfo);
+                productInfo,
+                iotHubConnectionString.ModelId);
         }
     }
 }

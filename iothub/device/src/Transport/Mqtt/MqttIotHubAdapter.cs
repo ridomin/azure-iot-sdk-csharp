@@ -79,6 +79,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         private int InboundBacklogSize => this.deviceBoundOneWayProcessor.BacklogSize + this.deviceBoundTwoWayProcessor.BacklogSize;
 
         private ProductInfo productInfo;
+        private string modelId;
 
         private ushort _packetId = 0;
         private SpinLock _packetIdLock = new SpinLock();
@@ -91,7 +92,8 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             MqttTransportSettings mqttTransportSettings,
             IWillMessage willMessage,
             IMqttIotHubEventHandler mqttIotHubEventHandler,
-            ProductInfo productInfo)
+            ProductInfo productInfo,
+            string modelId = "")
         {
             Contract.Requires(deviceId != null);
             Contract.Requires(iotHubHostName != null);
@@ -102,6 +104,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
             this.deviceId = deviceId;
             this.moduleId = moduleId;
+            this.modelId = modelId;
             this.iotHubHostName = iotHubHostName;
             this.passwordProvider = passwordProvider;
             this.mqttTransportSettings = mqttTransportSettings;
@@ -292,7 +295,9 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                 {
                     ClientId = id,
                     HasUsername = true,
-                    Username = $"{this.iotHubHostName}/{id}/?api-version={ClientApiVersionHelper.ApiVersionString}&DeviceClientType={Uri.EscapeDataString(this.productInfo.ToString())}",
+                    Username = $"{this.iotHubHostName}/{id}/?api-version={ClientApiVersionHelper.ApiVersionString}" +
+                                $"&DeviceClientType={Uri.EscapeDataString(this.productInfo.ToString())}" +
+                                $"&digital-twin-model-id={this.modelId}",
                     HasPassword = !string.IsNullOrEmpty(password),
                     Password = password,
                     KeepAliveInSeconds = this.mqttTransportSettings.KeepAliveInSeconds,
