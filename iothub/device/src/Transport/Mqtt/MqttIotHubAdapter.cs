@@ -295,15 +295,18 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                 {
                     ClientId = id,
                     HasUsername = true,
-                    Username = $"{this.iotHubHostName}/{id}/?api-version={ClientApiVersionHelper.ApiVersionString}" +
-                                $"&DeviceClientType={Uri.EscapeDataString(this.productInfo.ToString())}" +
-                                $"&digital-twin-model-id={this.modelId}",
+                    Username = $"{this.iotHubHostName}/{id}/?api-version={ClientApiVersionHelper.ApiVersionString}&DeviceClientType={Uri.EscapeDataString(this.productInfo.ToString())}",
                     HasPassword = !string.IsNullOrEmpty(password),
                     Password = password,
                     KeepAliveInSeconds = this.mqttTransportSettings.KeepAliveInSeconds,
                     CleanSession = this.mqttTransportSettings.CleanSession,
                     HasWill = this.mqttTransportSettings.HasWill
                 };
+                if (!String.IsNullOrEmpty(this.modelId))
+                {
+                    connectPacket.Username += $"&digital-twin-model-id={this.modelId}";
+                }
+
                 if (connectPacket.HasWill)
                 {
                     Message message = this.willMessage.Message;
