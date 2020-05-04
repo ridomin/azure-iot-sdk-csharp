@@ -28,6 +28,7 @@ namespace Microsoft.Azure.Devices.Client
         private const string SharedAccessKeyPropertyName = "SharedAccessKey";
         private const string SharedAccessSignaturePropertyName = "SharedAccessSignature";
         private const string GatewayHostNamePropertyName = "GatewayHostName";
+        private const string ModelIdPropertyName = "ModelId";
         private const RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
         private static readonly TimeSpan regexTimeoutMilliseconds = TimeSpan.FromMilliseconds(500);
         private const string X509CertPropertyName = "X509Cert";
@@ -163,6 +164,11 @@ namespace Microsoft.Azure.Devices.Client
         public string GatewayHostName { get; internal set; }
 
         /// <summary>
+        /// Gets the optional name of the ModelId to use 
+        /// </summary>
+        public string ModelId { get; internal set; }
+
+        /// <summary>
         /// Gets the shared access signature used to connect to the IoT Hub service.
         /// </summary>
         public string SharedAccessSignature { get; internal set; }
@@ -196,6 +202,7 @@ namespace Microsoft.Azure.Devices.Client
             stringBuilder.AppendKeyValuePairIfNotEmpty(SharedAccessSignaturePropertyName, SharedAccessSignature);
             stringBuilder.AppendKeyValuePairIfNotEmpty(X509CertPropertyName, UsingX509Cert);
             stringBuilder.AppendKeyValuePairIfNotEmpty(GatewayHostNamePropertyName, GatewayHostName);
+            stringBuilder.AppendKeyValuePairIfNotEmpty(ModelIdPropertyName, ModelId);
             if (stringBuilder.Length > 0)
             {
                 stringBuilder.Remove(stringBuilder.Length - 1, 1);
@@ -216,7 +223,7 @@ namespace Microsoft.Azure.Devices.Client
             SharedAccessSignature = GetConnectionStringOptionalValue(map, SharedAccessSignaturePropertyName);
             UsingX509Cert = GetConnectionStringOptionalValueOrDefault<bool>(map, X509CertPropertyName, GetX509, true);
             GatewayHostName = GetConnectionStringOptionalValue(map, GatewayHostNamePropertyName);
-
+            ModelId = GetConnectionStringOptionalValue(map, ModelIdPropertyName);
             Validate();
         }
 

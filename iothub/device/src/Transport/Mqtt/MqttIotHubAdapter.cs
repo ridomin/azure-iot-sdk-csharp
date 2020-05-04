@@ -79,6 +79,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         private int InboundBacklogSize => this.deviceBoundOneWayProcessor.BacklogSize + this.deviceBoundTwoWayProcessor.BacklogSize;
 
         private ProductInfo productInfo;
+        private string modelId;
 
         private ushort _packetId = 0;
         private SpinLock _packetIdLock = new SpinLock();
@@ -91,7 +92,8 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             MqttTransportSettings mqttTransportSettings,
             IWillMessage willMessage,
             IMqttIotHubEventHandler mqttIotHubEventHandler,
-            ProductInfo productInfo)
+            ProductInfo productInfo,
+            string modelId = "")
         {
             Contract.Requires(deviceId != null);
             Contract.Requires(iotHubHostName != null);
@@ -102,6 +104,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
             this.deviceId = deviceId;
             this.moduleId = moduleId;
+            this.modelId = modelId;
             this.iotHubHostName = iotHubHostName;
             this.passwordProvider = passwordProvider;
             this.mqttTransportSettings = mqttTransportSettings;
@@ -299,6 +302,11 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                     CleanSession = this.mqttTransportSettings.CleanSession,
                     HasWill = this.mqttTransportSettings.HasWill
                 };
+                if (!String.IsNullOrEmpty(this.modelId))
+                {
+                    connectPacket.Username += $"&digital-twin-model-id={this.modelId}";
+                }
+
                 if (connectPacket.HasWill)
                 {
                     Message message = this.willMessage.Message;
