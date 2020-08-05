@@ -11,6 +11,7 @@ using Microsoft.Azure.Devices.Shared;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PnpHelpers;
+using Rido;
 
 namespace TemperatureController
 {
@@ -79,7 +80,7 @@ namespace TemperatureController
             // -> Send "maxTempSinceLastReboot" over property update, when a new max temperature is set - on "Thermostat" components.
 
             s_logger.LogDebug($"Initialize the device client.");
-            InitializeDeviceClientAsync();
+            await InitializeDeviceClientAsync();
 
             s_logger.LogDebug($"Set handler for \"reboot\" command.");
             await s_deviceClient.SetMethodHandlerAsync("reboot", HandleRebootCommandAsync, s_deviceClient);
@@ -122,13 +123,10 @@ namespace TemperatureController
 
         // Initialize the device client instance over Mqtt protocol (TCP, with fallback over Websocket), setting the ModelId into ClientOptions.
         // This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
-        private static void InitializeDeviceClientAsync()
+        private static async Task InitializeDeviceClientAsync()
         {
-            var options = new ClientOptions
-            {
-                ModelId = ModelId,
-            };
-            s_deviceClient = DeviceClient.CreateFromConnectionString(s_deviceConnectionString, TransportType.Mqtt, options);
+            s_deviceClient = await DeviceClientFactory.CreateDeviceClientAsync(s_deviceConnectionString, ModelId);
+
             s_deviceClient.SetConnectionStatusChangesHandler((status, reason) =>
             {
                 s_logger.LogDebug($"Connection status change registered - status={status}, reason={reason}.");
