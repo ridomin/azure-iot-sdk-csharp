@@ -66,7 +66,7 @@ namespace Thermostat
             // -> Send "maxTempSinceLastReboot" over property update, when a new max temperature is set.
 
             s_logger.LogDebug($"Initialize the device client.");
-            InitializeDeviceClientAsync();
+            await InitializeDeviceClientAsync();
 
             s_logger.LogDebug($"Set handler to receive \"targetTemperature\" updates.");
             await s_deviceClient.SetDesiredPropertyUpdateCallbackAsync(TargetTemperatureUpdateCallbackAsync, s_deviceClient);
