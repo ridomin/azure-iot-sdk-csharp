@@ -96,6 +96,7 @@ namespace TemperatureController
 
             await SendDeviceMemoryAsync();
             await SendDeviceSerialNumberAsync();
+            await SendDeviceInfoAsync();
 
             bool temperatureReset = true;
             s_maxTemp[Thermostat1] = 0d;
@@ -125,7 +126,7 @@ namespace TemperatureController
         // This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
         private static async Task InitializeDeviceClientAsync()
         {
-            s_deviceClient = await DeviceClientFactory.CreateDeviceClientAsync(s_deviceConnectionString, ModelId);
+            s_deviceClient = await DeviceClientFactory.CreateDeviceClientAsync(s_deviceConnectionString, s_logger, ModelId);
 
             s_deviceClient.SetConnectionStatusChangesHandler((status, reason) =>
             {
@@ -144,6 +145,26 @@ namespace TemperatureController
             await s_deviceClient.SendEventAsync(msg);
             s_logger.LogDebug($"Telemetry: Sent - {{ \"{telemetryName}\": {workingSet}KiB }}.");
         }
+
+        private static async Task SendDeviceInfoAsync()
+        {
+            var reported = new TwinCollection();
+            reported["deviceInformation"] = new
+            {
+                __t = "c",
+                manufacturer = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER"),
+                model = Environment.OSVersion.Platform.ToString(),
+                swVersion = Environment.OSVersion.VersionString,
+                osName = Environment.GetEnvironmentVariable("OS"),
+                processorArchitecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"),
+                processorManufacturer = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER"),
+                totalStorage = 123,// System.IO.DriveInfo.GetDrives()[0].TotalSize,
+                totalMemory = Environment.WorkingSet
+            };
+            await s_deviceClient.UpdateReportedPropertiesAsync(reported);
+            s_logger.LogDebug($"DeviceInfo: Reported");
+        }
+
 
         // Send device serial number over property update.
         private static async Task SendDeviceSerialNumberAsync()
