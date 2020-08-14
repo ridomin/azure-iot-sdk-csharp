@@ -66,7 +66,7 @@ namespace Thermostat
             // -> Send "maxTempSinceLastReboot" over property update, when a new max temperature is set.
 
             s_logger.LogDebug($"Initialize the device client.");
-            InitializeDeviceClientAsync();
+            await InitializeDeviceClientAsync();
 
             s_logger.LogDebug($"Set handler to receive \"targetTemperature\" updates.");
             await s_deviceClient.SetDesiredPropertyUpdateCallbackAsync(TargetTemperatureUpdateCallbackAsync, s_deviceClient);
@@ -94,13 +94,9 @@ namespace Thermostat
 
         // Initialize the device client instance over Mqtt protocol (TCP, with fallback over Websocket), setting the ModelId into ClientOptions.
         // This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
-        private static void InitializeDeviceClientAsync()
+        private static async Task InitializeDeviceClientAsync()
         {
-            var options = new ClientOptions
-            {
-                ModelId = ModelId,
-            };
-            s_deviceClient = DeviceClient.CreateFromConnectionString(s_deviceConnectionString, TransportType.Mqtt, options);
+            s_deviceClient = await Rido.DeviceClientFactory.CreateDeviceClientAsync(s_deviceConnectionString, ModelId);
             s_deviceClient.SetConnectionStatusChangesHandler((status, reason) =>
             {
                 s_logger.LogDebug($"Connection status change registered - status={status}, reason={reason}.");

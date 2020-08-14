@@ -11,6 +11,7 @@ using Microsoft.Azure.Devices.Shared;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PnpHelpers;
+using Rido;
 
 namespace TemperatureController
 {
@@ -79,7 +80,7 @@ namespace TemperatureController
             // -> Send "maxTempSinceLastReboot" over property update, when a new max temperature is set - on "Thermostat" components.
 
             s_logger.LogDebug($"Initialize the device client.");
-            InitializeDeviceClientAsync();
+            await InitializeDeviceClientAsync();
 
             s_logger.LogDebug($"Set handler for \"reboot\" command.");
             await s_deviceClient.SetMethodHandlerAsync("reboot", HandleRebootCommandAsync, s_deviceClient);
@@ -95,6 +96,7 @@ namespace TemperatureController
 
             await SendDeviceMemoryAsync();
             await SendDeviceSerialNumberAsync();
+            //await SendDeviceInfoAsync();
 
             bool temperatureReset = true;
             s_maxTemp[Thermostat1] = 0d;
@@ -122,13 +124,10 @@ namespace TemperatureController
 
         // Initialize the device client instance over Mqtt protocol (TCP, with fallback over Websocket), setting the ModelId into ClientOptions.
         // This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
-        private static void InitializeDeviceClientAsync()
+        private static async Task InitializeDeviceClientAsync()
         {
-            var options = new ClientOptions
-            {
-                ModelId = ModelId,
-            };
-            s_deviceClient = DeviceClient.CreateFromConnectionString(s_deviceConnectionString, TransportType.Mqtt, options);
+            s_deviceClient = await DeviceClientFactory.CreateDeviceClientAsync(s_deviceConnectionString, s_logger, ModelId);
+
             s_deviceClient.SetConnectionStatusChangesHandler((status, reason) =>
             {
                 s_logger.LogDebug($"Connection status change registered - status={status}, reason={reason}.");
@@ -146,6 +145,26 @@ namespace TemperatureController
             await s_deviceClient.SendEventAsync(msg);
             s_logger.LogDebug($"Telemetry: Sent - {{ \"{telemetryName}\": {workingSet}KiB }}.");
         }
+
+        private static async Task SendDeviceInfoAsync()
+        {
+            var reported = new TwinCollection();
+            reported["deviceInformation"] = new
+            {
+                __t = "c",
+                manufacturer = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER"),
+                model = Environment.OSVersion.Platform.ToString(),
+                swVersion = Environment.OSVersion.VersionString,
+                osName = Environment.GetEnvironmentVariable("OS"),
+                processorArchitecture = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"),
+                processorManufacturer = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER"),
+                totalStorage = 123,// System.IO.DriveInfo.GetDrives()[0].TotalSize,
+                totalMemory = Environment.WorkingSet
+            };
+            await s_deviceClient.UpdateReportedPropertiesAsync(reported);
+            s_logger.LogDebug($"DeviceInfo: Reported");
+        }
+
 
         // Send device serial number over property update.
         private static async Task SendDeviceSerialNumberAsync()
