@@ -96,7 +96,7 @@ namespace TemperatureController
 
             await SendDeviceMemoryAsync();
             await SendDeviceSerialNumberAsync();
-            await SendDeviceInfoAsync();
+            //await SendDeviceInfoAsync();
 
             bool temperatureReset = true;
             s_maxTemp[Thermostat1] = 0d;
